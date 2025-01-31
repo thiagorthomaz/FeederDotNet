@@ -14,20 +14,30 @@ namespace FeederDotNet.Services
             articleRepository = _articleRepository;
         }
 
-        public async Task Execute()
+        public async Task test()
         {
 
-            SmartReader.Reader sr = new SmartReader.Reader("https://arstechnica.com/information-technology/2017/02/humans-must-become-cyborgs-to-survive-says-elon-musk/");
-            SmartReader.Article article = sr.GetArticle();
+            Models.Article article = await Execute("https://arstechnica.com/information-technology/2017/02/humans-must-become-cyborgs-to-survive-says-elon-musk/");
+            await articleRepository.AddAsync(article);
+
+        }
+
+
+        public async Task<Models.Article> Execute(string url)
+        {
+
+            SmartReader.Reader sr = new SmartReader.Reader(url);
+            SmartReader.Article article = await sr.GetArticleAsync();
 
             var config = new MapperConfiguration(cfg => cfg.CreateMap<SmartReader.Article, Models.Article>());
 
             var mapper = new Mapper(config);
             Models.Article localArticle = mapper.Map<Models.Article>(article);
-            
-            await articleRepository.AddAsync(localArticle);
+
+            return localArticle;
 
         }
+
 
     }
 }

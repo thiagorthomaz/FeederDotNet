@@ -3,6 +3,6 @@
 
     public interface ICrawlerServices
     {
-        Task Execute();
+        Task<Models.Article> Execute(string url);
     }
 }

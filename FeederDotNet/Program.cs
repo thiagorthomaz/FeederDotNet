@@ -29,6 +29,7 @@ builder.Services.AddHangfireServer();
 
 // repository
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
+builder.Services.AddTransient<IDataSetRepository, DataSetRepository>();
 
 // services
 builder.Services.AddTransient<ICrawlerServices, CrawlerServices>();
@@ -48,6 +49,8 @@ app.UseHangfireDashboard("/dashboard");
 RecurringJob.RemoveIfExists("CrawlerWroker.Execute");
 RecurringJob.AddOrUpdate<CrawlerWroker>("CrawlerWroker.Execute", s => s.Execute(), Cron.Hourly);
 
+RecurringJob.RemoveIfExists("SeederWorker.Execute");
+RecurringJob.AddOrUpdate<SeederWorker>("SeederWorker.Execute", s => s.Execute(), Cron.Never);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

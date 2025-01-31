@@ -1,4 +1,5 @@
 ﻿
+using FeederDotNet.DAL;
 using FeederDotNet.Models;
 
 namespace FeederDotNet.Services
@@ -6,8 +7,13 @@ namespace FeederDotNet.Services
     public class SeedServices : ISeedServices
     {
 
-        public SeedServices() { 
-        
+        private readonly IDataSetRepository datasetRepository;
+        private readonly ICrawlerServices crawlerServices;
+
+
+        public SeedServices(IDataSetRepository _datasetRepository, ICrawlerServices _crawlerServices) { 
+            datasetRepository = _datasetRepository;
+            crawlerServices = _crawlerServices;
         }
 
         public async Task Execute()
@@ -25,9 +31,11 @@ namespace FeederDotNet.Services
             datasets.Add(new Dataset { Url = "https://girodociclismo.com.br/tom-pidcock-vence-4a-etapa-do-alula-tour-e-amplia-lideranca-confira-os-resultados-e-a-chegada/", Classification = "Ciclismo" });
             datasets.Add(new Dataset { Url = "https://girodociclismo.com.br/campeonato-mundial-de-ciclismo-pode-mudar-de-local-uci-prepara-plano-b-devido-a-violencia-no-congo/", Classification = "Ciclismo" });
 
-
-
-
+            foreach (var dataset in datasets) {
+                Models.Article article = await crawlerServices.Execute(dataset.Url);
+                dataset.Text = article.TextContent;
+                await datasetRepository.AddAsync(dataset);
+            }
 
         }
     }
