@@ -52,6 +52,9 @@ RecurringJob.AddOrUpdate<CrawlerWorker>("CrawlerWorker.Execute", s => s.Execute(
 RecurringJob.RemoveIfExists("SeederWorker.Execute");
 RecurringJob.AddOrUpdate<SeederWorker>("SeederWorker.Execute", s => s.Execute(), Cron.Never);
 
+RecurringJob.RemoveIfExists("MLWorker.Execute");
+RecurringJob.AddOrUpdate<MLWorker>("MLWorker.Execute", s => s.TrainDataSet(), Cron.Hourly);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
