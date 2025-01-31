@@ -32,6 +32,8 @@ builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
 
 // services
 builder.Services.AddTransient<ICrawlerServices, CrawlerServices>();
+builder.Services.AddTransient<ISeedServices, SeedServices>();
+builder.Services.AddTransient<IPredictionServices, PredictionServices>();
 
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
