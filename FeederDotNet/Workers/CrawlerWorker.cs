@@ -2,12 +2,12 @@
 
 namespace FeederDotNet.Workers
 {
-    public class CrawlerWroker
+    public class CrawlerWorker
     {
 
         ICrawlerServices crawlerServices;
 
-        public CrawlerWroker(ICrawlerServices _crawlerServices)
+        public CrawlerWorker(ICrawlerServices _crawlerServices)
         {
             crawlerServices = _crawlerServices;
 

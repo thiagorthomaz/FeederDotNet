@@ -46,8 +46,8 @@ var app = builder.Build();
 app.UseHangfireDashboard("/dashboard");
 
 
-RecurringJob.RemoveIfExists("CrawlerWroker.Execute");
-RecurringJob.AddOrUpdate<CrawlerWroker>("CrawlerWroker.Execute", s => s.Execute(), Cron.Hourly);
+RecurringJob.RemoveIfExists("CrawlerWorker.Execute");
+RecurringJob.AddOrUpdate<CrawlerWorker>("CrawlerWorker.Execute", s => s.Execute(), Cron.Hourly);
 
 RecurringJob.RemoveIfExists("SeederWorker.Execute");
 RecurringJob.AddOrUpdate<SeederWorker>("SeederWorker.Execute", s => s.Execute(), Cron.Never);
