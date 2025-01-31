@@ -16,6 +16,7 @@ namespace FeederDotNet.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<Models.Article>();
+            modelBuilder.Entity<Models.Dataset>();
 
 
         }
