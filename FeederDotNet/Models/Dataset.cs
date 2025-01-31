@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FeederDotNet.Models
 {
@@ -7,7 +8,8 @@ namespace FeederDotNet.Models
 
         [Key]
         [Required]
-        public Uri Uri { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Guid Id { get; set; }
 
         //
         // Value:
@@ -17,6 +19,9 @@ namespace FeederDotNet.Models
 
         [Required]
         public string Classification { get; set; }
+
+        [Required]
+        public string Url { get; set; }
 
     }
 }
