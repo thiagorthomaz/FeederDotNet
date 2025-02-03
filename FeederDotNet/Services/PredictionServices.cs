@@ -1,6 +1,7 @@
 ﻿using FeederDotNet.Models;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 
@@ -19,54 +20,63 @@ namespace FeederDotNet.Services
 
         public async Task TrainAsync() {
 
-            DatabaseLoader loader = mlContext.Data.CreateDatabaseLoader<ClassificationData>();
+            try {
 
-            string connectionString = @"Server=(localdb)\\MSSqlLocalDb;Database=Feeder;Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;Persist Security Info=False;";
+                DatabaseLoader loader = mlContext.Data.CreateDatabaseLoader<ClassificationData>();
 
-            string sqlCommand = "SELECT * from Dataset;";
+                //string connectionString = @"Server=(localdb)\\MSSqlLocalDb;Database=Feeder;Integrated Security=False;TrustServerCertificate=True;MultipleActiveResultSets=True;Persist Security Info=False;";
+                string connectionString = @"Data Source=(localdb)\mssqllocaldb;Initial Catalog=Feeder;Integrated Security=True;Encrypt=True;Trust Server Certificate=True";
 
-            DatabaseSource dbSource = new DatabaseSource(SqlClientFactory.Instance, connectionString, sqlCommand);
+                string sqlCommand = "SELECT * from Dataset;";
 
-            IDataView dataView = loader.Load(dbSource);
+                DatabaseSource dbSource = new DatabaseSource(SqlClientFactory.Instance, connectionString, sqlCommand);
 
-
-            // Split the data into train and test sets
-            var trainTestSplit = mlContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
-            var trainSet = trainTestSplit.TrainSet;
-            var testSet = trainTestSplit.TestSet;
+                IDataView dataView = loader.Load(dbSource);
 
 
-            // Data processing pipeline
-            var dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("Label")
-            .Append(mlContext.Transforms.Text.FeaturizeText(
-              outputColumnName: "Features",
-              inputColumnName: nameof(ClassificationData.ClassificationText)));
+                // Split the data into train and test sets
+                var trainTestSplit = mlContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
+                var trainSet = trainTestSplit.TrainSet;
+                var testSet = trainTestSplit.TestSet;
 
-            //Training Algorithm
 
-            var trainer = mlContext.MulticlassClassification
-              .Trainers
-              .SdcaMaximumEntropy(
-                labelColumnName: "Label", featureColumnName: "Features");
+                // Data processing pipeline
+                var dataProcessPipeline = mlContext.Transforms.Conversion.MapValueToKey("Label")
+                .Append(mlContext.Transforms.Text.FeaturizeText(
+                  outputColumnName: "Features",
+                  inputColumnName: nameof(ClassificationData.ClassificationText)));
 
-            var trainingPipeline = dataProcessPipeline
-                .Append(trainer)
-                .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
+                //Training Algorithm
 
-            //Model Training
-            var trainedModel = trainingPipeline.Fit(trainSet);
+                var trainer = mlContext.MulticlassClassification
+                  .Trainers
+                  .SdcaMaximumEntropy(
+                    labelColumnName: "Label", featureColumnName: "Features");
 
-            //Model Evaluation
-            var predictions = trainedModel.Transform(testSet);
-            var metrics = mlContext.MulticlassClassification.Evaluate(predictions, "Label");
+                var trainingPipeline = dataProcessPipeline
+                    .Append(trainer)
+                    .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
-            //Displaying Evaluation Metrics
-            //Console.WriteLine($"Macro accuracy: {metrics.MacroAccuracy:P2}");
-            //Console.WriteLine($"Micro accuracy: {metrics.MicroAccuracy:P2}");
-            //Console.WriteLine($"Log loss: {metrics.LogLoss:P2}");
+                //Model Training
+                var trainedModel = trainingPipeline.Fit(trainSet);
 
-            // Save the trained model to a file
-            mlContext.Model.Save(trainedModel, dataView.Schema, modelPath);
+                //Model Evaluation
+                var predictions = trainedModel.Transform(testSet);
+                var metrics = mlContext.MulticlassClassification.Evaluate(predictions, "Label");
+
+                //Displaying Evaluation Metrics
+                //Console.WriteLine($"Macro accuracy: {metrics.MacroAccuracy:P2}");
+                //Console.WriteLine($"Micro accuracy: {metrics.MicroAccuracy:P2}");
+                //Console.WriteLine($"Log loss: {metrics.LogLoss:P2}");
+
+                // Save the trained model to a file
+                mlContext.Model.Save(trainedModel, dataView.Schema, modelPath);
+
+            }
+            catch (Exception e) { 
+                Console.WriteLine($"Exception: {e.Message}");
+            }
+            
 
         }
 
