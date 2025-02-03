@@ -16,8 +16,7 @@ namespace FeederDotNet.Services
             crawlerServices = _crawlerServices;
         }
 
-        public async Task Execute()
-        {
+        public List<Dataset> getAllSources() {
 
             List<Dataset> datasets = new List<Dataset>();
 
@@ -30,6 +29,14 @@ namespace FeederDotNet.Services
             datasets.Add(new Dataset { Url = "https://girodociclismo.com.br/egan-bernal-quebra-de-recorde-de-iconica-montanha-na-colombia-apos-treino-assista-o-video/", Classification = "Ciclismo" });
             datasets.Add(new Dataset { Url = "https://girodociclismo.com.br/tom-pidcock-vence-4a-etapa-do-alula-tour-e-amplia-lideranca-confira-os-resultados-e-a-chegada/", Classification = "Ciclismo" });
             datasets.Add(new Dataset { Url = "https://girodociclismo.com.br/campeonato-mundial-de-ciclismo-pode-mudar-de-local-uci-prepara-plano-b-devido-a-violencia-no-congo/", Classification = "Ciclismo" });
+
+            return datasets;
+        }
+
+        public async Task Execute()
+        {
+
+            List<Dataset> datasets = getAllSources();
 
             foreach (var dataset in datasets) {
                 Models.Article article = await crawlerServices.Execute(dataset.Url);

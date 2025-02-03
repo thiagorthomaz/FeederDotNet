@@ -4,6 +4,8 @@
     {
         
         Task TrainAsync();
+        
+        Task PredictDataSetTest();
 
     }
 }

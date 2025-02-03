@@ -12,10 +12,18 @@ namespace FeederDotNet.Services
 
         private readonly MLContext mlContext;
         private readonly String modelPath;
+        private readonly ISeedServices seedServices;
+        private readonly ICrawlerServices crawlerServices;
 
-        public PredictionServices() {
+
+        public PredictionServices(ISeedServices _seedServices, ICrawlerServices _crawlerServices) {
+
             mlContext = new MLContext();
             modelPath = "./Data/trained_model.zip";
+
+            seedServices = _seedServices;
+            crawlerServices = _crawlerServices;
+
         }
 
         public async Task TrainAsync() {
@@ -81,27 +89,41 @@ namespace FeederDotNet.Services
         }
 
 
-        public async Task Predict() {
+        public async Task PredictDataSetTest() {
 
 
             // Load the trained model
-            var loadedModel = mlContext.Model.Load("path_to_your_saved_model.zip", out var modelInputSchema);
+            var loadedModel = mlContext.Model.Load(modelPath, out var modelInputSchema);
 
             // Create prediction engine
             var predEngine = mlContext.Model.CreatePredictionEngine<ClassificationData, ClassificationPrediction>(loadedModel);
 
-            // Sample text for prediction
-            var sampleText = new ClassificationData
-            {
-                ClassificationText = "The product was outstanding and the service excellent."
-            };
+            List<Dataset> sources = seedServices.getAllSources();
 
-            // Make a prediction
-            var predictionResult = predEngine.Predict(sampleText);
+            foreach (Dataset src in sources) {
 
-            // Display the prediction
-            Console.WriteLine($"Predicted classification: {predictionResult.Prediction}");
+                Article Article = await crawlerServices.Execute(src.Url);
 
+                // Sample text for prediction
+                var sampleText = new ClassificationData
+                {
+                    ClassificationText = Article.TextContent
+                };
+
+                // Make a prediction
+                var predictionResult = predEngine.Predict(sampleText);
+
+                // Display the prediction
+                if (src.Classification == predictionResult.Prediction)
+                {
+                    Console.WriteLine($"Correct prediction: {predictionResult.Prediction}");
+                }
+                else {
+                    Console.WriteLine($"Wrong prediction: {predictionResult.Prediction}");
+                }
+                
+
+            }
 
         }
 
