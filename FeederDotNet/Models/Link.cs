@@ -2,10 +2,12 @@
 
 namespace FeederDotNet.Models
 {
-    public class CrawledLink
+    public class Link
     {
         [Key]
         public string Url { get; set; }
         public DateTime CrawledAt { get; set; }
+        public DateTime? ScribedAt { get; set; }
+        public string Status { get; set; }
     }
 }

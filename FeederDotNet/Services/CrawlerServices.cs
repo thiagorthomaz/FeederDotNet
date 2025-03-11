@@ -12,7 +12,7 @@ namespace FeederDotNet.Services
 
         private static readonly HttpClient client = new HttpClient();
         private readonly HashSet<string> visitedUrls = new HashSet<string>();
-        private readonly List<CrawledLink> crawledLinks = new List<CrawledLink>();
+        private readonly List<Link> crawledLinks = new List<Link>();
 
 
         private async Task<bool> IsValidLinkAsync(string url)
@@ -77,7 +77,7 @@ namespace FeederDotNet.Services
 
             Console.WriteLine($"Crawling: {url}");
             visitedUrls.Add(url);
-            crawledLinks.Add(new CrawledLink { Url = url, CrawledAt = DateTime.UtcNow });
+            crawledLinks.Add(new Link { Url = url, CrawledAt = DateTime.UtcNow });
 
             string html = await FetchHtmlAsync(url);
             if (html == null) return;
