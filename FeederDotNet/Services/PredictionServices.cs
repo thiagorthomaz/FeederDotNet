@@ -13,16 +13,16 @@ namespace FeederDotNet.Services
         private readonly MLContext mlContext;
         private readonly String modelPath;
         private readonly ISeedServices seedServices;
-        private readonly ICrawlerServices crawlerServices;
+        private readonly IScraperServices scraperServices;
 
 
-        public PredictionServices(ISeedServices _seedServices, ICrawlerServices _crawlerServices) {
+        public PredictionServices(ISeedServices _seedServices, IScraperServices _scraperServices) {
 
             mlContext = new MLContext();
             modelPath = "./Data/trained_model.zip";
 
             seedServices = _seedServices;
-            crawlerServices = _crawlerServices;
+            scraperServices = _scraperServices;
 
         }
 
@@ -102,7 +102,7 @@ namespace FeederDotNet.Services
 
             foreach (Dataset src in sources) {
 
-                Article Article = await crawlerServices.Execute(src.Url);
+                Article Article = await scraperServices.Execute(src.Url);
 
                 // Sample text for prediction
                 var sampleText = new ClassificationData

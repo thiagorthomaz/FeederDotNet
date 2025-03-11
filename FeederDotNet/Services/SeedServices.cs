@@ -8,12 +8,12 @@ namespace FeederDotNet.Services
     {
 
         private readonly IDataSetRepository datasetRepository;
-        private readonly ICrawlerServices crawlerServices;
+        private readonly IScraperServices scraperServices;
 
 
-        public SeedServices(IDataSetRepository _datasetRepository, ICrawlerServices _crawlerServices) { 
+        public SeedServices(IDataSetRepository _datasetRepository, IScraperServices _scraperServices) { 
             datasetRepository = _datasetRepository;
-            crawlerServices = _crawlerServices;
+            scraperServices = _scraperServices;
         }
 
         public List<Dataset> getAllSources() {
@@ -59,7 +59,7 @@ namespace FeederDotNet.Services
             List<Dataset> datasets = getAllSources();
 
             foreach (var dataset in datasets) {
-                Models.Article article = await crawlerServices.Execute(dataset.Url);
+                Models.Article article = await scraperServices.Execute(dataset.Url);
                 dataset.Text = article.TextContent;
                 await datasetRepository.AddAsync(dataset);
             }

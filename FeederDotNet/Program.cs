@@ -33,6 +33,7 @@ builder.Services.AddTransient<IDataSetRepository, DataSetRepository>();
 
 // services
 builder.Services.AddTransient<ICrawlerServices, CrawlerServices>();
+builder.Services.AddTransient<IScraperServices, ScraperServices>();
 builder.Services.AddTransient<ISeedServices, SeedServices>();
 builder.Services.AddTransient<IPredictionServices, PredictionServices>();
 
