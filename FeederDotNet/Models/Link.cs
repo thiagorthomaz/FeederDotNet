@@ -7,7 +7,7 @@ namespace FeederDotNet.Models
         [Key]
         public string Url { get; set; }
         public DateTime CrawledAt { get; set; }
-        public DateTime? ScribedAt { get; set; }
+        public DateTime? ScrapedAt { get; set; }
         public string Status { get; set; }
     }
 }
