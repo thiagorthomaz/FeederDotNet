@@ -3,6 +3,6 @@
 
     public interface ICrawlerServices
     {
-        
+        public Task Test();
     }
 }
