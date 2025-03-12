@@ -30,6 +30,7 @@ builder.Services.AddHangfireServer();
 // repository
 builder.Services.AddTransient<IArticleRepository, ArticleRepository>();
 builder.Services.AddTransient<IDataSetRepository, DataSetRepository>();
+builder.Services.AddTransient<ILinkRepository, LinkRepository>();
 
 // services
 builder.Services.AddTransient<ICrawlerServices, CrawlerServices>();

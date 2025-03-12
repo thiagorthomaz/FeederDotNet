@@ -17,6 +17,7 @@ namespace FeederDotNet.Data
 
             modelBuilder.Entity<Models.Article>();
             modelBuilder.Entity<Models.Dataset>();
+            modelBuilder.Entity<Models.Link>();
 
 
         }

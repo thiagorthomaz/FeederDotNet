@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using AngleSharp.Dom;
+using AutoMapper;
 using FeederDotNet.DAL;
 using FeederDotNet.Models;
 using Hangfire.Server;
@@ -13,6 +14,12 @@ namespace FeederDotNet.Services
         private static readonly HttpClient client = new HttpClient();
         private readonly HashSet<string> visitedUrls = new HashSet<string>();
         private readonly List<Link> crawledLinks = new List<Link>();
+        private readonly ILinkRepository linkRepository;
+
+        public CrawlerServices(ILinkRepository _linkRepository)
+        {
+            linkRepository = _linkRepository;
+        }
 
 
         private async Task<bool> IsValidLinkAsync(string url)
@@ -57,51 +64,64 @@ namespace FeederDotNet.Services
                 return false;
             }
 
-            bool alreadyCrawled = await LinkAlreadyCrawled(url);
-            if (alreadyCrawled) {
-                return false;
+            bool isRootUrl = IsRootUrl(url);
+            if (!isRootUrl) {
+                bool alreadyCrawled = await LinkAlreadyCrawled(url);
+                if (alreadyCrawled) {
+                    return false;
+                }
             }
 
             return true;
 
         }
 
-
-        public async Task CrawlAsync(string url, int depth)
+        private bool IsRootUrl(string url)
         {
+            try
+            {
+                Uri uri = new Uri(url);
+                string rootUrl = $"{uri.Scheme}://{uri.Host}/"; // Ex: "https://exemplo.com/"
+                return uri.AbsoluteUri.TrimEnd('/') == rootUrl.TrimEnd('/');
+            }
+            catch (UriFormatException)
+            {
+                Console.WriteLine("Not root URL.");
+                return false;
+            }
+        }
 
-            if (depth <= 0 || visitedUrls.Contains(url)) return;
-
-            bool isValidLink = await IsValidLinkAsync(url);
-            if (!isValidLink) return;
-
-            Console.WriteLine($"Crawling: {url}");
-            visitedUrls.Add(url);
-            crawledLinks.Add(new Link { Url = url, CrawledAt = DateTime.UtcNow });
+        public async Task CrawlAsync(string url)
+        {
 
             string html = await FetchHtmlAsync(url);
             if (html == null) return;
-
+  
             List<string> links = ExtractLinks(html, url);
             foreach (string link in links)
             {
-                await CrawlAsync(link, depth - 1);
+                Console.WriteLine($"Crawling: {url}");
+                bool isValidLink = await IsValidLinkAsync(url);
+                if (isValidLink)
+                {
+                    await SaveCrawledLink(link);
+                }
             }
 
-            await SaveCrawledLinks();
+            
 
         }
 
         private async Task<bool> LinkAlreadyCrawled(string url)
         {
-
-
-            return false;
+            Link? link = await linkRepository.FindLinkAsync(url);
+            return link != null;
         }
 
-        private async Task SaveCrawledLinks()
+        private async Task SaveCrawledLink(string url)
         {
-
+            Link link = new Link { CreatedAt = DateTime.Now, CrawledAt = DateTime.Now, Url = url, Status = "A" };
+            await linkRepository.AddAsync(link);
         }
 
         private async Task<string> FetchHtmlAsync(string url)
@@ -139,14 +159,12 @@ namespace FeederDotNet.Services
                     links.Add(result.ToString());
                 }
             }
-            return links;
+            return links.Distinct().ToList();
         }
 
         public async Task Test() {
             string startUrl = "https://ge.globo.com/"; // Change this URL as needed
-            int maxDepth = 2;
-
-            await CrawlAsync(startUrl, maxDepth);
+            await CrawlAsync(startUrl);
         }
 
     }
